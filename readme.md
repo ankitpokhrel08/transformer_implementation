@@ -1,18 +1,18 @@
-# Sanskrit-to-English Neural Machine Translation 🕉️
+# Sanskrit-to-English Neural Machine Translation
 
 A character-level Transformer model for translating English text to Sanskrit using PyTorch, with a beautiful Streamlit web interface.
 
-## 🎯 Overview
+## Overview
 
 This project implements a complete neural machine translation system that converts English text to Sanskrit (Devanagari script) using a Transformer architecture with multi-head attention mechanisms.
 
 ## ✨ Features
 
-- **🧠 Transformer Architecture**: Full encoder-decoder with multi-head attention
-- **📝 Character-Level Translation**: Fine-grained tokenization for better accuracy
-- **� Complete Vocabulary**: Comprehensive Sanskrit character set 
+- **Transformer Architecture**: Full encoder-decoder with multi-head attention
+- **Character-Level Translation**: Fine-grained tokenization for better accuracy
+- **Complete Vocabulary**: Comprehensive Sanskrit character set 
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. **Install Dependencies**
 
@@ -40,7 +40,7 @@ streamlit run app.py
 - Enter English text: _"Your right is to perform your duty only"_
 - Get Sanskrit output: _कर्मण्येवाधिकारस्ते मा फलेषु कदाचन_
 
-## 🧠 Model Architecture
+## Model Architecture
 
 - **Type**: Encoder-Decoder Transformer
 - **Dimensions**: 512 (d_model), 2048 (FFN)
@@ -58,7 +58,7 @@ streamlit run app.py
 
 
 
-## 🔧 Technical Details
+## Technical Details
 
 - **Framework**: PyTorch 2.0+
 - **Training Data**: English-Sanskrit parallel corpus
@@ -66,7 +66,7 @@ streamlit run app.py
 - **Attention**: Multi-head self-attention + cross-attention
 - **Masking**: Look-ahead and padding masks
 
-## � Training Process
+## Training Process
 
 1. **Data Preparation**: Filter valid sentence pairs
 2. **Vocabulary Building**: Character-level tokenization
@@ -74,7 +74,7 @@ streamlit run app.py
 4. **Training Loop**: 50 epoch with checkpoint saving
 5. **Evaluation**: Real-time translation testing
 
-## 🎯 Performance
+## Performance
 
 - **Training**: ~50 epochs on parallel corpus
 - **Inference**: Real-time character generation
