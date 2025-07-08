@@ -6,7 +6,7 @@ A character-level Transformer model for translating English text to Sanskrit usi
 
 This project implements a complete neural machine translation system that converts English text to Sanskrit (Devanagari script) using a Transformer architecture with multi-head attention mechanisms.
 
-## ✨ Features
+## Features
 
 - **Transformer Architecture**: Full encoder-decoder with multi-head attention
 - **Character-Level Translation**: Fine-grained tokenization for better accuracy
