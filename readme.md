@@ -1,238 +1,231 @@
-# Sanskrit to English Translation using Transformer Architecture
+# Sanskrit-to-English Neural Machine Translation 🕉️
 
-A complete implementation of the Transformer architecture for neural machine translation from Sanskrit (Devanagari script) to English, built from scratch using PyTorch.
+A character-level Transformer model for translating English text to Sanskrit using PyTorch, with a beautiful Streamlit web interface.
 
-## 🏗️ Architecture Overview
+## 🎯 Overview
 
-This project implements the full Transformer architecture as described in "Attention Is All You Need" (Vaswani et al., 2017), including:
+This project implements a complete neural machine translation system that converts English text to Sanskrit (Devanagari script) using a Transformer architecture with multi-head attention mechanisms.
 
-### Core Components
+## ✨ Features
 
-- **Multi-Head Self-Attention**: Scaled dot-product attention with multiple attention heads
-- **Positional Encoding**: Sinusoidal position embeddings for sequence modeling
-- **Feed-Forward Networks**: Position-wise fully connected layers
-- **Layer Normalization**: Applied before each sub-layer (Pre-LN architecture)
-- **Residual Connections**: Skip connections around each sub-layer
+- **🧠 Transformer Architecture**: Full encoder-decoder with multi-head attention
+- **📝 Character-Level Translation**: Fine-grained tokenization for better accuracy
+- **🌐 Web Interface**: Dark-themed Streamlit app for real-time testing
+- **� Complete Vocabulary**: Comprehensive Sanskrit character set with IAST support
+- **⚡ GPU/MPS Support**: Optimized for CUDA and Apple Silicon (M1/M2/M3)
+- **💿 Model Persistence**: Checkpoint saving and vocabulary export
 
-### Model Architecture
-
-```
-Input (Sanskrit) → Encoder → Context → Decoder → Output (English)
-```
-
-**Encoder Stack:**
-
-- 1 layer (configurable) of Multi-Head Attention + FFN
-- Input: Sanskrit character sequences (Devanagari script)
-- Output: Contextualized representations
-
-**Decoder Stack:**
-
-- 1 layer (configurable) of Masked Multi-Head Attention + Cross-Attention + FFN
-- Input: English character sequences (target)
-- Output: English token probabilities
-
-## 📊 Implementation Details
-
-### Vocabulary & Tokenization
-
-- **Character-level tokenization** for both Sanskrit and English
-- **Sanskrit vocabulary**: 114 characters (Devanagari script + punctuation)
-- **English vocabulary**: 157 characters (Latin alphabet + extended characters)
-- **Special tokens**: `START_TOKEN`, `END_TOKEN`, `PADDING_TOKEN`
-
-### Model Configuration
-
-```python
-d_model = 512          # Model dimension
-num_heads = 8          # Attention heads
-ffn_hidden = 2048      # Feed-forward hidden size
-num_layers = 1         # Encoder/Decoder layers
-max_seq_length = 200   # Maximum sequence length
-dropout = 0.1          # Dropout rate
-```
-
-### Training Setup
-
-- **Loss function**: CrossEntropyLoss with padding token masking
-- **Optimizer**: Adam (lr=1e-4)
-- **Device**: CUDA GPU support with automatic fallback to CPU
-- **Batch size**: 30 sequences
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-```bash
-pip install torch numpy matplotlib
-```
-
-### Project Structure
+## 🏗️ Project Structure
 
 ```
 sanskrit_to_english/
-├── transformer/
-│   ├── transformer.py           # Core transformer implementation
-│   ├── final_transformer.ipynb  # Training and inference notebook
-│   └── notes/                   # Architecture diagrams
-├── data/
-│   ├── dev.en                   # English sentences
-│   └── dev.sn                   # Sanskrit sentences
-└── readme.md
+├── 📊 data/
+│   ├── dev.en                    # English sentences
+│   ├── dev.sn                    # Sanskrit sentences
+│   └── cleaning.ipynb            # Data preprocessing
+├── 🤖 transformer/
+│   ├── transformer.py            # Main model implementation
+│   ├── final_transformer.ipynb   # Training notebook
+│   ├── working_transformer.ipynb # Development notebook
+│   └── checkpoint.pth            # Trained model weights
+├── 📦 models/
+│   └── sanskrit_vocabulary.pkl   # Exported vocabulary data
+├── 🌐 app.py                     # Streamlit web interface
+├── 📋 requirements.txt           # Python dependencies
+└── 🚀 run_app.sh                # Quick start script
 ```
 
-### Running the Model
+## 🚀 Quick Start
 
-1. **Load the notebook**: Open `transformer/final_transformer.ipynb`
-2. **Data preparation**: The notebook automatically builds vocabularies from actual data
-3. **Training**: Run the training loop (supports both CPU and GPU)
-4. **Inference**: Use `translate_sanskrit_to_english()` function
+### 1. **Install Dependencies**
+
+```bash
+pip install torch numpy streamlit matplotlib jupyter
+```
+
+### 2. **Train the Model** (Optional)
+
+```bash
+cd transformer/
+jupyter notebook final_transformer.ipynb
+# Run all cells to train from scratch
+```
+
+### 3. **Launch Web App**
+
+```bash
+chmod +x run_app.sh
+./run_app.sh
+```
+
+### 4. **Use the Model**
+
+- Open `http://localhost:8501` in your browser
+- Enter English text: _"Your right is to perform your duty only"_
+- Get Sanskrit output: _कर्मण्येवाधिकारस्ते मा फलेषु कदाचन_
+
+## 🧠 Model Architecture
+
+- **Type**: Encoder-Decoder Transformer
+- **Dimensions**: 512 (d_model), 2048 (FFN)
+- **Attention Heads**: 8
+- **Layers**: 1 (configurable)
+- **Vocabulary**: 89 Sanskrit + 183 English characters
+- **Max Length**: 200 characters
+- **Training**: Adam optimizer, Cross-entropy loss
+
+## 📊 Vocabulary Coverage
+
+### Sanskrit (89 tokens):
+
+- **Vowels**: अ आ इ ई उ ऊ ऋ ॠ ऌ ॡ ए ऐ ओ औ
+- **Consonants**: All 33 Devanagari consonants
+- **Diacritics**: ा ि ी ु ू ृ ॄ े ै ो ौ
+- **Special**: ं ः ँ ् । ॥ (anusvara, visarga, virama, etc.)
+
+### English (183 tokens):
+
+- Standard ASCII + Extended Latin + IAST transliteration
+- Unicode support for scholarly texts
+
+## 🌐 Web Interface
+
+The Streamlit app provides:
+
+- **🌑 Dark Theme**: Elegant black background with Sanskrit colors
+- **⚡ Real-time Translation**: Character-by-character generation
+- **📊 Model Info**: Vocabulary sizes, parameters, device status
+- **📖 Examples**: Built-in test sentences
+- **📋 Copy Support**: Easy copying of Sanskrit output
+
+### Sample Translations:
+
+- _"I am here"_ → _अहम् अत्र अस्मि_
+- _"Do work don't expect result"_ → _कर्म कुर्वन्तु फलं मा प्रत्याशयन्तु_
+
+## 💻 Usage Examples
+
+### Command Line (Python):
 
 ```python
-# Example usage
-translation = translate_sanskrit_to_english("नमस्ते")
-print(translation)  # Output: English translation
+from transformer import Transformer
+import pickle
+
+# Load vocabulary
+with open('models/sanskrit_vocabulary.pkl', 'rb') as f:
+    vocab_data = pickle.load(f)
+
+# Initialize and load model
+transformer = Transformer(...)  # with vocab_data parameters
+checkpoint = torch.load('transformer/checkpoint.pth')
+transformer.load_state_dict(checkpoint['model_state_dict'])
+
+# Translate
+result = translate("Your text here")
+print(result)  # Sanskrit output
 ```
 
-## 📈 Training Process
+### Web Interface:
 
-### Data Pipeline
+```bash
+streamlit run app.py
+```
 
-1. **Vocabulary Construction**: Scan all characters in the dataset
-2. **Sentence Filtering**: Remove sentences exceeding max length or containing unknown characters
-3. **Masking**: Create attention masks for padding and look-ahead constraints
-4. **Batching**: Group sentences into batches for efficient training
+## 🔧 Technical Details
 
-### Attention Masks
+- **Framework**: PyTorch 2.0+
+- **Training Data**: English-Sanskrit parallel corpus
+- **Tokenization**: Character-level with special tokens
+- **Attention**: Multi-head self-attention + cross-attention
+- **Masking**: Look-ahead and padding masks
+- **Device Support**: CUDA, MPS (Apple Silicon), CPU
 
-- **Encoder Self-Attention**: Padding mask only
-- **Decoder Self-Attention**: Causal (look-ahead) + padding mask
-- **Decoder Cross-Attention**: Padding mask for encoder outputs
+## � Training Process
 
-## 🔍 Key Insights & Lessons Learned
+1. **Data Preparation**: Filter valid sentence pairs
+2. **Vocabulary Building**: Character-level tokenization
+3. **Model Initialization**: Xavier uniform weights
+4. **Training Loop**: 50+ epochs with checkpoint saving
+5. **Evaluation**: Real-time translation testing
 
-### ⚠️ Limitations of Current Approach
+## 🎯 Performance
 
-#### 1. **Character-Level Tokenization Issues**
+- **Training**: ~50 epochs on parallel corpus
+- **Inference**: Real-time character generation
+- **Memory**: Efficient checkpoint system
+- **Accuracy**: Contextual Sanskrit generation
 
-- **Morphological complexity**: Sanskrit has rich morphology that character-level tokenization fails to capture
-- **Compound words**: Sanskrit compounds are not properly segmented
-- **Contextual meaning**: Characters alone don't preserve semantic units
+## �️ Customization
 
-#### 2. **Single-Layer Architecture**
-
-- **Limited capacity**: Only 1 encoder/decoder layer severely limits model expressiveness
-- **Poor long-range dependencies**: Cannot capture complex linguistic relationships
-- **Underfitting**: Model lacks capacity for the complexity of Sanskrit-English translation
-
-#### 3. **Dataset Limitations**
-
-- **Size**: Limited training data (~4,633 valid sentence pairs)
-- **Domain**: Narrow domain coverage affects generalization
-- **Quality**: Character-level alignment may not reflect proper translation units
-
-### 🎯 Better Approaches
-
-#### 1. **Subword Tokenization**
+### Model Parameters:
 
 ```python
-# Recommended: Use BPE or SentencePiece
-from transformers import AutoTokenizer
-tokenizer = AutoTokenizer.from_pretrained("bert-base-multilingual-cased")
+d_model = 512        # Model dimension
+num_heads = 8        # Attention heads
+num_layers = 1       # Transformer layers
+max_length = 200     # Sequence length
 ```
 
-#### 2. **Increased Model Capacity**
+### Training Configuration:
 
 ```python
-# Better configuration
-num_layers = 6        # Standard transformer depth
-d_model = 512         # Keep reasonable for computational efficiency
-num_heads = 8         # Multi-head attention
+batch_size = 30      # Training batch size
+learning_rate = 1e-4 # Adam learning rate
+epochs = 50          # Training epochs
 ```
 
-#### 3. **Pre-trained Models**
+## 🐛 Troubleshooting
 
-- **mBERT**: Multilingual BERT with Sanskrit support
-- **IndicBERT**: Specialized for Indic languages
-- **mT5**: Multilingual T5 for translation tasks
+### Common Issues:
 
-#### 4. **Word-Level or Subword-Level Translation**
+- **Model not loading**: Check `checkpoint.pth` exists
+- **Vocabulary error**: Ensure `sanskrit_vocabulary.pkl` is present
+- **Import errors**: Install PyTorch and dependencies
+- **CUDA/MPS**: Model auto-detects available device
 
-```python
-# Better tokenization preserves meaning
-sanskrit_word = "नमस्कार"  # Complete word unit
-vs_chars = ["न", "म", "स्", "क", "ा", "र"]  # Character fragments
+### File Verification:
+
+```bash
+ls transformer/checkpoint.pth models/sanskrit_vocabulary.pkl
 ```
 
-## 📊 Results & Performance
+## 🔍 Key Insights & Limitations
 
-### Current Model Performance
+### Current Approach:
 
-- **Training**: Model learns to optimize character-level cross-entropy loss
-- **Translation quality**: Limited due to character-level approach and shallow architecture
-- **Speed**: Fast inference due to simple architecture
+- **Character-level tokenization**: Simple but limited for morphologically rich Sanskrit
+- **Single-layer architecture**: Fast training but limited capacity
+- **Real-time inference**: Good for demonstration and testing
 
-### Expected Improvements with Better Architecture
+### Potential Improvements:
 
-- **BLEU Score**: Would significantly improve with proper tokenization
-- **Semantic accuracy**: Better with word/subword units
-- **Fluency**: Improved with deeper models and larger datasets
+- **Subword tokenization** (BPE/SentencePiece) for better semantic units
+- **Deeper models** (6+ layers) for increased capacity
+- **Pre-trained multilingual models** (mBERT, IndicBERT) for better performance
+- **Larger datasets** for improved generalization
 
-## 🔧 Technical Implementation Highlights
+## 📝 Notes
 
-### Custom Transformer Components
+- **Character-level**: Works with any input length
+- **Sanskrit Script**: Outputs proper Devanagari
+- **Extensible**: Easy to add more languages/features
+- **Research**: Based on "Attention is All You Need" paper
+- **Educational**: Great for understanding Transformer architecture
 
-```python
-class MultiHeadAttention(nn.Module):
-    # Implements scaled dot-product attention
+## 🤝 Contributing
 
-class PositionalEncoding(nn.Module):
-    # Sinusoidal position embeddings
+1. Fork the repository
+2. Create feature branch
+3. Add improvements
+4. Test with various inputs
+5. Submit pull request
 
-class SentenceEmbedding(nn.Module):
-    # Character-level embedding + positional encoding
-```
+## 📄 License
 
-### GPU Optimization
-
-- Automatic CUDA detection and memory management
-- Efficient tensor operations on GPU
-- Memory monitoring during training
-
-### Masking Strategy
-
-```python
-def create_masks(src_batch, tgt_batch):
-    # Creates all necessary attention masks
-    # - Padding masks for variable-length sequences
-    # - Causal masks for autoregressive generation
-```
-
-## 🚦 Future Improvements
-
-1. **Tokenization**: Implement BPE/SentencePiece tokenization
-2. **Architecture**: Increase to 6+ layers for better capacity
-3. **Dataset**: Use larger, more diverse Sanskrit-English parallel corpora
-4. **Evaluation**: Implement BLEU score and other translation metrics
-5. **Beam Search**: Add beam search decoding for better translations
-6. **Fine-tuning**: Start from pre-trained multilingual models
-
-## 📚 References
-
-- Vaswani, A., et al. (2017). "Attention Is All You Need"
-- Devlin, J., et al. (2018). "BERT: Pre-training of Deep Bidirectional Transformers"
-- Kenton, J. D. M. W. C., & Toutanova, L. K. (2019). "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding"
-
-## 🎓 Learning Outcomes
-
-This project demonstrates:
-
-- **Complete Transformer implementation** from scratch
-- **Understanding of attention mechanisms** and their importance
-- **Practical challenges** in neural machine translation
-- **Why modern approaches** use subword tokenization and pre-trained models
-- **Importance of model capacity** and architectural choices
+Open source - feel free to use for research and education.
 
 ---
 
-**Note**: This implementation serves as an educational example of transformer architecture. For production Sanskrit-English translation, consider using pre-trained multilingual models with proper subword tokenization.
+**🕉️ Preserving Ancient Wisdom Through Modern Technology**
+
+_Built with PyTorch, Streamlit, and dedication to Sanskrit literature_
