@@ -1,6 +1,6 @@
 # Sanskrit-to-English Neural Machine Translation
 
-A character-level Transformer model for translating English text to Sanskrit using PyTorch, with a beautiful Streamlit web interface.
+A character-level Transformer model for translating English text to Sanskrit using PyTorch.
 
 ## Overview
 
@@ -17,7 +17,7 @@ This project implements a complete neural machine translation system that conver
 ### 1. **Install Dependencies**
 
 ```bash
-pip install torch numpy streamlit matplotlib jupyter
+pip install torch numpy matplotlib jupyter
 ```
 
 ### 2. **Train the Model** (Optional)
@@ -28,17 +28,6 @@ jupyter notebook final_transformer.ipynb
 # Run all cells to train from scratch
 ```
 
-### 3. **Launch Web App**
-
-```bash
-streamlit run app.py
-```
-
-### 4. **Use the Model**
-
-- Open `http://localhost:8501` in your browser
-- Enter English text: _"Your right is to perform your duty only"_
-- Get Sanskrit output: _कर्मण्येवाधिकारस्ते मा फलेषु कदाचन_
 
 ## Model Architecture
 
