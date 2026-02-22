@@ -1,2 +1,4 @@
 .DS_Store
 myenv
+__pycache__/
+*.pyc
