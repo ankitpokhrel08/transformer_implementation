@@ -10,7 +10,7 @@ This project implements a complete neural machine translation system that conver
 
 - **Transformer Architecture**: Full encoder-decoder with multi-head attention
 - **Character-Level Translation**: Fine-grained tokenization for better accuracy
-- **Complete Vocabulary**: Comprehensive Sanskrit character set 
+- **Complete Vocabulary**: Comprehensive Sanskrit character set
 
 ## Quick Start
 
@@ -28,7 +28,6 @@ jupyter notebook final_transformer.ipynb
 # Run all cells to train from scratch
 ```
 
-
 ## Model Architecture
 
 - **Type**: Encoder-Decoder Transformer
@@ -39,13 +38,10 @@ jupyter notebook final_transformer.ipynb
 - **Max Length**: 200 characters
 - **Training**: Adam optimizer, Cross-entropy loss
 
-
 ### Sample Translations:
 
 - _"I am here"_ → _अहम् अत्र अस्मि_
 - _"Do work don't expect result"_ → _कर्म कुर्वन्तु फलं मा प्रत्याशयन्तु_
-
-
 
 ## Technical Details
 
@@ -67,5 +63,4 @@ jupyter notebook final_transformer.ipynb
 
 - **Training**: ~50 epochs on parallel corpus
 - **Inference**: Real-time character generation
-- **Accuracy**: Not accurate
-
+- **Accuracy**: Not accurate/Accurate over large corpus
