@@ -1,4 +1,4 @@
 .DS_Store
-myenv
+venv
 __pycache__/
 *.pyc
