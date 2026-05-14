@@ -129,14 +129,26 @@ print(f"Total sentence pairs loaded: {len(english_sentences)}")
 # 4. HYPERPARAMETERS
 # ─────────────────────────────────────────────
 
-max_sequence_length = 256
-d_model             = 512
+
+#Tested on small dataset of around 20 sentences, with these hyperparameters:
+# max_sequence_length = 50
+# d_model             = 128
+# batch_size          = 8
+# ffn_hidden          = 512
+# num_heads           = 4
+# drop_prob           = 0
+# num_layers          = 6
+# NEG_INFTY           = -1e9
+
+max_sequence_length = 200
 batch_size          = 8
+d_model             = 512
 ffn_hidden          = 2048
 num_heads           = 8
 drop_prob           = 0.1
 num_layers          = 6
 NEG_INFTY           = -1e9
+
 
 # FIX 2: src = Sanskrit (encoder input), tgt = English (decoder output)
 src_vocab_size = len(sanskrit_vocabulary)
@@ -401,7 +413,7 @@ def train(num_epochs: int = 10, resume: bool = True):
                 skt_batch, eng_batch,          # FIX 1: correct source/target order
                 enc_mask.to(device), dec_mask.to(device), cross_mask.to(device),
                 enc_start_token=False, enc_end_token=False,
-                dec_start_token=True,  dec_end_token=True,
+                dec_start_token=True,  dec_end_token=False,
             )
 
             # FIX 4: Labels must be English tokens (decoder's vocabulary)

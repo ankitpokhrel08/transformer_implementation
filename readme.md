@@ -56,8 +56,9 @@ python3 evaluation.py --checkpoint models/checkpoint.pth --n_samples 500 --out_d
 - **Batch Size**: 16
 - **Epochs**: 50 with per-epoch checkpointing
 - **Weight Init**: Xavier uniform
-- **Data**: 27,604 valid Sanskrit-English sentence pairs (filtered from 75,161)
+- **Data**: 54721 valid Sanskrit-English sentence pairs (filtered from 75,161)
 - **Device**: Auto-detects MPS (Apple Silicon) → CUDA → CPU
+- **Batches per epoch**: 3450
 
 ## Evaluation Metrics
 
@@ -67,3 +68,7 @@ Running `evaluation.py` produces in `eval_results/`:
 - `metrics_per_sample.csv` — per-sentence scores
 - Several graphs: score distributions, length analysis, BLEU vs ChrF correlation
 - `sample_translations.txt` — best, worst, and random translation samples
+
+## Notes
+
+- The model was first checked on short dataset of around 20 handpicked small sentences and we overfit in it such that we know how well model performs then the model is trained on whole large corpus of data. The `results_on_short_dataset` is the result of that overfitted training and the model `short_dataset.pth` is the model thus generated.

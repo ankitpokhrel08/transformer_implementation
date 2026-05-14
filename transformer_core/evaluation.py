@@ -115,6 +115,17 @@ num_heads           = 8
 drop_prob           = 0.1
 num_layers          = 6
 NEG_INFTY           = -1e9
+
+#Evaluation on Short Sentences (short.en/sn):
+# max_sequence_length = 50
+# d_model             = 128
+# batch_size          = 8
+# ffn_hidden          = 512
+# num_heads           = 4
+# drop_prob           = 0
+# num_layers          = 6
+# NEG_INFTY           = -1e9
+
 tgt_vocab_size      = len(english_vocabulary)
 
 # ─────────────────────────────────────────────
@@ -151,8 +162,8 @@ print(f"Loaded checkpoint — epoch {trained_epoch}, loss {trained_loss:.4f}")
 # 5. LOAD DATA & FILTER (same logic as training)
 # ─────────────────────────────────────────────
 
-english_file  = '../data/train.en'
-sanskrit_file = '../data/train.sn'
+english_file  = '../data/short.en'
+sanskrit_file = '../data/short.sn'
 
 with open(english_file,  'r', encoding='utf-8') as f:
     english_sentences = [l.rstrip('\n') for l in f.readlines()]
