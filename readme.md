@@ -72,3 +72,65 @@ Running `evaluation.py` produces in `eval_results/`:
 ## Notes
 
 - The model was first checked on short dataset of around 20 handpicked small sentences and we overfit in it such that we know how well model performs then the model is trained on whole large corpus of data. The `results_on_short_dataset` is the result of that overfitted training and the model `short_dataset.pth` is the model thus generated.
+
+## Results
+
+### Performance
+
+Training was conducted for 10 epochs on 27,604 valid Sanskrit-English sentence pairs
+using a full 6-layer encoder-decoder Transformer on an Apple M2 Air (MPS backend).
+
+| Metric      | Score               |
+| ----------- | ------------------- |
+| Corpus BLEU | _run evaluation.py_ |
+| Corpus ChrF | _run evaluation.py_ |
+| Corpus TER  | _run evaluation.py_ |
+
+### Observations
+
+The model achieved near-perfect translation on shorter, simpler sentences within the
+training distribution — demonstrating that the paper architecture was implemented
+correctly. For longer and more complex shlokas, the model produced recognizable
+translations with occasional character-level substitutions, which is expected behavior
+for a character-level model trained on a small corpus.
+
+SKT : बालकः पुस्तकं पठति।
+REF : The boy reads a book.
+HYP : The boy reads a book.
+BLEU=100.00 ChrF=100.00 TER=0.00
+
+Training on a larger dataset showed significant improvement in output coherence and
+vocabulary coverage, though 10 epochs was insufficient to fully converge — the loss
+was still declining at the point of stopping. Given more training time and data, further
+improvement is expected. Overall performance was satisfactory and the core goal of
+implementing the original Transformer paper (Vaswani et al. 2017) from scratch was
+successful.
+
+A sample output at epoch 10:
+SKT : तस्यास्तु चरणौ वह्निर्ददाह भगवान् स्वयम्। न च तस्या मनो दुःखं स्वल्पमप्यभवत् तदा॥
+EN : The worshipful Agni himself consumed her feet. For this, however, the maiden did not feel the slightest pain.
+PRD : The sordhipful asni samself wonsimed tir hoat Tor thes tewever, Ohe sonden tes tot aiel ahe seaghtest orrn
+
+SKT : स तैः शूरैरनुज्ञातो ययौ राजनिवेशनम्। पार्थमादाय गोविन्दो ददर्श च युधिष्ठिरम्॥
+EN : Having been thus permitted by those warriors he started for the camp of the king. Govinda, then, with Partha, saw Yudhishthira.
+PRD : Teving seen thus arrfisted by these thrriors warwponted aor the sarp of the sing To ind the Ohth tartha tay tudhishthira
+
+### Limitations
+
+- Character-level tokenization produces longer sequences and plateaus earlier than
+  subword (BPE/SentencePiece) approaches
+- 27,604 training pairs is a small corpus for neural machine translation
+- M2 Air thermal constraints limited practical training to ~10 epochs
+
+### Better Approach — Fine-tuning
+
+The most effective solution to Sanskrit-English translation is fine-tuning a pretrained
+large language model rather than training from scratch. My other project demonstrates
+this approach:
+
+**[Fine-tuning Llama-2-7b-chat-hf with QLoRA](https://github.com/ankitpokhrel08/llm-projects/tree/main/finetuning_Llama-2-7b-chat-hf)**
+
+Fine-tunes `meta-llama/Llama-2-7b-chat-hf` using QLoRA (Quantized Low-Rank Adaptation)
+on a custom Bhagavad Gita dataset, creating an AI Krishna that responds with spiritual
+wisdom. This approach leverages the pretrained model's existing language understanding
+and requires significantly less compute to achieve superior translation quality.

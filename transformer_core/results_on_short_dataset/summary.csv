@@ -1,7 +1,0 @@
-metric,value
-corpus_bleu,95.6496
-corpus_chrf,98.3836
-corpus_ter,2.0
-trained_epoch,889
-trained_loss,0.0178
-n_samples,20
