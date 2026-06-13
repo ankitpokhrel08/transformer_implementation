@@ -3,3 +3,13 @@ venv
 __pycache__/
 *.pyc
 models/
+# Nepali NMT data: raw dump is 3.5GB, train files ~300MB — regenerate with
+# data_nepali/prepare_data.py instead of committing
+data_nepali/raw/
+data_nepali/train.en
+data_nepali/train.ne
+*.log
+
+EVALUATION_GUIDE.txt
+resume.txt
+linkedin.md

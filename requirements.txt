@@ -6,3 +6,4 @@ scipy
 tensorboard 
 streamlit
 sacrebleu
+sentencepiece

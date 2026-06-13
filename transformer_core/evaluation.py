@@ -1,19 +1,18 @@
 """
-evaluation.py  —  Sanskrit → English Transformer
-Loads saved checkpoint, runs evaluation, saves metrics as CSV and graphs as PNG.
+evaluation.py  —  English → Nepali Transformer
+Translates the FLORES-200 devtest benchmark, saves metrics as CSV and graphs as PNG.
 
 Usage:
     python3 evaluation.py
-    python3 evaluation.py --checkpoint models/checkpoint.pth --n_samples 500
+    python3 evaluation.py --checkpoint models/en_ne_best.pth --n_samples 1012
+    python3 evaluation.py --src ../data_nepali/dev.en --ref ../data_nepali/dev.ne
 """
 
 import os
 import argparse
 import csv
-import math
 import numpy as np
 import torch
-import torch.nn as nn
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -25,14 +24,17 @@ except ImportError:
     raise SystemExit("pip install sacrebleu")
 
 from transformer import Transformer
+from data_pipeline import load_tokenizers, greedy_translate
 
 # ─────────────────────────────────────────────
 # 0. ARGS
 # ─────────────────────────────────────────────
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--checkpoint',  default='models/checkpoint.pth')
-parser.add_argument('--n_samples',   type=int, default=500)
+parser.add_argument('--checkpoint',  default='models/en_ne_best.pth')
+parser.add_argument('--src',         default='../data_nepali/test.en')
+parser.add_argument('--ref',         default='../data_nepali/test.ne')
+parser.add_argument('--n_samples',   type=int, default=1012)
 parser.add_argument('--out_dir',     default='eval_results')
 args = parser.parse_args()
 
@@ -51,205 +53,54 @@ else:
 print(f"Device: {device}")
 
 # ─────────────────────────────────────────────
-# 2. VOCAB (copy from training.py)
+# 2. LOAD CHECKPOINT & BUILD MODEL
 # ─────────────────────────────────────────────
-
-START_TOKEN   = '<START>'
-PADDING_TOKEN = '<PADDING>'
-END_TOKEN     = '<END>'
-
-sanskrit_vocabulary = [
-    START_TOKEN, ' ', '!', '"', "'", '(', ')', ',', '-', '.', '?', ':', ';',
-    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-    'अ', 'आ', 'इ', 'ई', 'उ', 'ऊ', 'ऋ', 'ॠ', 'ऌ', 'ॡ', 'ए', 'ऐ', 'ओ', 'औ',
-    'क', 'ख', 'ग', 'घ', 'ङ',
-    'च', 'छ', 'ज', 'झ', 'ञ',
-    'ट', 'ठ', 'ड', 'ढ', 'ण',
-    'त', 'थ', 'द', 'ध', 'न',
-    'प', 'फ', 'ब', 'भ', 'म',
-    'य', 'र', 'ल', 'व',
-    'श', 'ष', 'स', 'ह',
-    'ा', 'ि', 'ी', 'ु', 'ू', 'ृ', 'ॄ', 'े', 'ै', 'ो', 'ौ',
-    'ं', 'ः', 'ँ', '्',
-    '।', '॥',
-    PADDING_TOKEN, END_TOKEN
-]
-
-english_vocabulary = [
-    START_TOKEN, ' ', '!', '"', '#', '$', '%', '&', "'", '(', ')', '*', '+',
-    ',', '-', '.', '/',
-    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-    ':', ';', '<', '=', '>', '?', '@',
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
-    'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-    '_',
-    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l',
-    'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-    '{', '|', '}', '~', '·', 'º',
-    'á', 'â', 'ã', 'ä', 'å', 'ç', 'é', 'î', 'ñ', 'ú', 'ü',
-    'ă', 'ć', 'ę', 'ı', 'ļ', 'ł', 'ņ',
-    'Ś', 'ś', 'Ş', 'ş', 'Š', 'š', 'ţ', 'ſ', 'ș', 'ț', 'ə',
-    'ā', 'ī', 'ū', 'ṛ', 'ṝ', 'ḷ', 'ḹ', 'ṅ', 'ṭ', 'ḍ', 'ṇ', 'ṣ',
-    'Ā', 'Ī', 'Ū', 'Ṛ', 'Ṝ', 'Ḷ', 'Ḹ', 'Ṅ', 'Ṭ', 'Ḍ', 'Ṇ', 'Ṣ',
-    'о', 'О',
-    'ả', 'ặ', 'ị',
-    'ं', 'उ', 'ए', 'क', 'च', 'त', 'द', 'ध', 'न', 'भ', 'म', 'र', 'ल', 'व', 'श', 'स',
-    'ा', 'ि', 'ु', 'ै', 'ो', '्', '।', '॥',
-    '–', '—', '\u2018', '\u2019', '\u201c', '\u201d',
-    PADDING_TOKEN, END_TOKEN
-]
-
-index_to_sanskrit = {k: v for k, v in enumerate(sanskrit_vocabulary)}
-sanskrit_to_index = {v: k for k, v in enumerate(sanskrit_vocabulary)}
-index_to_english  = {k: v for k, v in enumerate(english_vocabulary)}
-english_to_index  = {v: k for k, v in enumerate(english_vocabulary)}
-
-# ─────────────────────────────────────────────
-# 3. HYPERPARAMETERS (must match training)
-# ─────────────────────────────────────────────
-
-max_sequence_length = 200
-d_model             = 512
-ffn_hidden          = 2048
-num_heads           = 8
-drop_prob           = 0.1
-num_layers          = 6
-NEG_INFTY           = -1e9
-
-#Evaluation on Short Sentences (short.en/sn):
-# max_sequence_length = 50
-# d_model             = 128
-# batch_size          = 8
-# ffn_hidden          = 512
-# num_heads           = 4
-# drop_prob           = 0
-# num_layers          = 6
-# NEG_INFTY           = -1e9
-
-tgt_vocab_size      = len(english_vocabulary)
-
-# ─────────────────────────────────────────────
-# 4. LOAD MODEL
-# ─────────────────────────────────────────────
-
-transformer = Transformer(
-    d_model             = d_model,
-    ffn_hidden          = ffn_hidden,
-    num_heads           = num_heads,
-    drop_prob           = drop_prob,
-    num_layers          = num_layers,
-    max_sequence_length = max_sequence_length,
-    kn_vocab_size       = tgt_vocab_size,
-    english_to_index    = english_to_index,
-    sanskrit_to_index   = sanskrit_to_index,
-    START_TOKEN         = START_TOKEN,
-    END_TOKEN           = END_TOKEN,
-    PADDING_TOKEN       = PADDING_TOKEN,
-)
 
 if not os.path.exists(args.checkpoint):
     raise SystemExit(f"Checkpoint not found: {args.checkpoint}")
 
-ckpt = torch.load(args.checkpoint, map_location=device)
+sp_src, sp_tgt = load_tokenizers()
+
+ckpt   = torch.load(args.checkpoint, map_location=device)
+config = ckpt['config']
+print(f"Model config: {config}")
+
+transformer = Transformer(
+    **config,
+    src_vocab_size=sp_src.get_piece_size(),
+    tgt_vocab_size=sp_tgt.get_piece_size(),
+)
 transformer.load_state_dict(ckpt['model_state_dict'])
 transformer.to(device)
 transformer.eval()
 trained_epoch = ckpt['epoch']
-trained_loss  = ckpt['loss']
-print(f"Loaded checkpoint — epoch {trained_epoch}, loss {trained_loss:.4f}")
+trained_loss  = ckpt.get('dev_loss', float('nan'))
+print(f"Loaded checkpoint — epoch {trained_epoch}, dev loss {trained_loss:.4f}")
 
 # ─────────────────────────────────────────────
-# 5. LOAD DATA & FILTER (same logic as training)
+# 3. LOAD TEST DATA
 # ─────────────────────────────────────────────
 
-english_file  = '../data/short.en'
-sanskrit_file = '../data/short.sn'
+with open(args.src, encoding='utf-8') as f:
+    src_sentences = [l.rstrip('\n') for l in f]
+with open(args.ref, encoding='utf-8') as f:
+    ref_sentences = [l.rstrip('\n') for l in f]
 
-with open(english_file,  'r', encoding='utf-8') as f:
-    english_sentences = [l.rstrip('\n') for l in f.readlines()]
-with open(sanskrit_file, 'r', encoding='utf-8') as f:
-    sanskrit_sentences = [l.rstrip('\n') for l in f.readlines()]
-
-def is_valid_tokens(sentence, vocab):
-    vocab_set = set(vocab)
-    return all(ch in vocab_set for ch in sentence)
-
-def is_valid_length(sentence, max_len):
-    return len(sentence) < (max_len - 2)
-
-valid_pairs = [
-    (skt, eng)
-    for skt, eng in zip(sanskrit_sentences, english_sentences)
-    if is_valid_length(skt, max_sequence_length)
-    and is_valid_length(eng, max_sequence_length)
-    and is_valid_tokens(skt, sanskrit_vocabulary)
-    and is_valid_tokens(eng, english_vocabulary)
-]
-
-# Use last N pairs as test set (these were seen during training,
-# swap to a held-out file if you have one)
-test_pairs = valid_pairs[-args.n_samples:]
-print(f"Evaluating on {len(test_pairs)} pairs")
+test_pairs = list(zip(src_sentences, ref_sentences))[:args.n_samples]
+print(f"Evaluating on {len(test_pairs)} pairs from {args.src}")
 
 # ─────────────────────────────────────────────
-# 6. MASK HELPER
+# 4. RUN INFERENCE
 # ─────────────────────────────────────────────
 
-def create_masks(skt_batch, eng_batch):
-    num_sentences   = len(skt_batch)
-    look_ahead_mask = torch.triu(
-        torch.full((max_sequence_length, max_sequence_length), True), diagonal=1
-    )
-    enc_pad   = torch.zeros(num_sentences, max_sequence_length, max_sequence_length, dtype=torch.bool)
-    dec_self  = torch.zeros(num_sentences, max_sequence_length, max_sequence_length, dtype=torch.bool)
-    dec_cross = torch.zeros(num_sentences, max_sequence_length, max_sequence_length, dtype=torch.bool)
-
-    for i in range(num_sentences):
-        skt_len     = len(skt_batch[i])
-        eng_len     = len(eng_batch[i])
-        skt_pad_idx = np.arange(skt_len + 1, max_sequence_length)
-        eng_pad_idx = np.arange(eng_len + 1, max_sequence_length)
-        enc_pad[i, :, skt_pad_idx]  = True
-        enc_pad[i, skt_pad_idx, :]  = True
-        dec_self[i, :, eng_pad_idx] = True
-        dec_self[i, eng_pad_idx, :] = True
-        dec_cross[i, :, skt_pad_idx] = True
-        dec_cross[i, eng_pad_idx, :] = True
-
-    enc_mask   = torch.where(enc_pad,                     NEG_INFTY, 0.0)
-    dec_mask   = torch.where(look_ahead_mask | dec_self,  NEG_INFTY, 0.0)
-    cross_mask = torch.where(dec_cross,                   NEG_INFTY, 0.0)
-    return enc_mask, dec_mask, cross_mask
-
-# ─────────────────────────────────────────────
-# 7. TRANSLATE (greedy)
-# ─────────────────────────────────────────────
-
-def translate(skt_sentence):
-    with torch.no_grad():
-        skt_batch    = (skt_sentence,)
-        eng_sentence = ""
-        for _ in range(max_sequence_length):
-            eng_batch  = (eng_sentence,)
-            enc_mask, dec_mask, cross_mask = create_masks(skt_batch, eng_batch)
-            preds = transformer(
-                skt_batch, eng_batch,
-                enc_mask.to(device), dec_mask.to(device), cross_mask.to(device),
-                enc_start_token=False, enc_end_token=False,
-                dec_start_token=True,  dec_end_token=False,
-            )
-            next_idx   = torch.argmax(preds[0][len(eng_sentence)]).item()
-            next_token = index_to_english[next_idx]
-            if next_token == END_TOKEN:
-                break
-            eng_sentence += next_token
-    return eng_sentence
-
-# ─────────────────────────────────────────────
-# 8. RUN INFERENCE
-# ─────────────────────────────────────────────
-
-bleu_metric  = BLEU(effective_order=True)
+# flores200 spm tokenizer scores Devanagari properly; fall back if this
+# sacrebleu build doesn't ship it
+try:
+    bleu_metric = BLEU(tokenize='flores200', effective_order=True)
+    print("BLEU tokenizer: flores200 (spm)")
+except Exception:
+    bleu_metric = BLEU(effective_order=True)
+    print("BLEU tokenizer: default 13a — Devanagari BLEU will read low; trust ChrF")
 chrf_metric  = CHRF()
 ter_metric   = TER()
 
@@ -258,19 +109,18 @@ references   = []
 rows         = []   # for CSV
 
 print("Running inference...")
-for i, (skt, ref) in enumerate(test_pairs):
-    pred = translate(skt)
+for i, (src, ref) in enumerate(test_pairs):
+    pred = greedy_translate(transformer, sp_src, sp_tgt, src, device)
     hypotheses.append(pred)
     references.append(ref)
 
-    # sentence-level scores
     s_bleu = bleu_metric.sentence_score(pred, [ref]).score
     s_chrf = chrf_metric.sentence_score(pred, [ref]).score
     s_ter  = ter_metric.sentence_score(pred, [ref]).score
 
     rows.append({
         'index'       : i,
-        'sanskrit'    : skt,
+        'source'      : src,
         'reference'   : ref,
         'hypothesis'  : pred,
         'bleu'        : round(s_bleu, 4),
@@ -278,13 +128,12 @@ for i, (skt, ref) in enumerate(test_pairs):
         'ter'         : round(s_ter,  4),
         'ref_len'     : len(ref),
         'hyp_len'     : len(pred),
-        'src_len'     : len(skt),
+        'src_len'     : len(src),
     })
 
     if (i + 1) % 50 == 0:
-        print(f"  {i+1}/{len(test_pairs)}")
+        print(f"  {i+1}/{len(test_pairs)}", flush=True)
 
-# corpus-level
 corpus_bleu = bleu_metric.corpus_score(hypotheses, [references]).score
 corpus_chrf = chrf_metric.corpus_score(hypotheses, [references]).score
 corpus_ter  = ter_metric.corpus_score(hypotheses,  [references]).score
@@ -293,11 +142,11 @@ print(f"\n{'='*45}")
 print(f"  Corpus BLEU : {corpus_bleu:.2f}")
 print(f"  Corpus ChrF : {corpus_chrf:.2f}")
 print(f"  Corpus TER  : {corpus_ter:.2f}")
-print(f"  Checkpoint  : epoch {trained_epoch}, loss {trained_loss:.4f}")
+print(f"  Checkpoint  : epoch {trained_epoch}, dev loss {trained_loss:.4f}")
 print(f"{'='*45}\n")
 
 # ─────────────────────────────────────────────
-# 9. SAVE METRICS CSV
+# 5. SAVE METRICS CSV
 # ─────────────────────────────────────────────
 
 csv_path = os.path.join(args.out_dir, 'metrics_per_sample.csv')
@@ -315,148 +164,222 @@ with open(summary_path, 'w', newline='', encoding='utf-8') as f:
     writer.writerow(['corpus_chrf',   round(corpus_chrf, 4)])
     writer.writerow(['corpus_ter',    round(corpus_ter,  4)])
     writer.writerow(['trained_epoch', trained_epoch])
-    writer.writerow(['trained_loss',  round(trained_loss, 4)])
+    writer.writerow(['dev_loss',      round(trained_loss, 4)])
     writer.writerow(['n_samples',     len(test_pairs)])
 print(f"Saved summary            → {summary_path}")
 
 # ─────────────────────────────────────────────
-# 10. GRAPHS
+# 6. GRAPHS
 # ─────────────────────────────────────────────
 
-bleu_scores = [r['bleu'] for r in rows]
-chrf_scores = [r['chrf'] for r in rows]
-ter_scores  = [r['ter']  for r in rows]
-src_lens    = [r['src_len'] for r in rows]
-ref_lens    = [r['ref_len'] for r in rows]
-hyp_lens    = [r['hyp_len'] for r in rows]
+bleu_scores = np.array([r['bleu'] for r in rows])
+chrf_scores = np.array([r['chrf'] for r in rows])
+ter_scores  = np.array([r['ter']  for r in rows])
+src_lens    = np.array([r['src_len'] for r in rows])
+ref_lens    = np.array([r['ref_len'] for r in rows])
+hyp_lens    = np.array([r['hyp_len'] for r in rows])
+
+# ── Shared professional style ─────────────────────────────────────────────────
+plt.rcParams.update({
+    'figure.dpi'        : 120,
+    'savefig.dpi'       : 200,
+    'savefig.bbox'      : 'tight',
+    'font.family'       : 'DejaVu Sans',
+    'font.size'         : 11,
+    'axes.titlesize'    : 13,
+    'axes.titleweight'  : 'bold',
+    'axes.labelsize'    : 11,
+    'axes.spines.top'   : False,
+    'axes.spines.right' : False,
+    'axes.grid'         : True,
+    'grid.color'        : '#dddddd',
+    'grid.linewidth'    : 0.8,
+    'axes.axisbelow'    : True,
+    'legend.frameon'    : False,
+})
+# Colorblind-friendly palette (Wong)
+C_BLEU, C_CHRF, C_TER, C_ACCENT = '#0072B2', '#E69F00', '#009E73', '#D55E00'
+SUBTITLE = f'English → Nepali  ·  FLORES-200 devtest  ·  epoch {trained_epoch}  ·  n = {len(test_pairs)}'
+
+
+def _binned_trend(x, y, n_bins=12):
+    """Mean y within equal-width x bins, for an uncluttered trend over noisy scatter."""
+    edges   = np.linspace(x.min(), x.max(), n_bins + 1)
+    centers = 0.5 * (edges[:-1] + edges[1:])
+    means   = np.full(n_bins, np.nan)
+    for i in range(n_bins):
+        sel = (x >= edges[i]) & (x < edges[i + 1] if i < n_bins - 1 else x <= edges[i + 1])
+        if sel.any():
+            means[i] = y[sel].mean()
+    ok = ~np.isnan(means)
+    return centers[ok], means[ok]
+
 
 # ── Graph 1: Score distributions ──────────────────────────────────────────────
-fig, axes = plt.subplots(1, 3, figsize=(15, 4))
-fig.suptitle(f'Score Distributions  (epoch {trained_epoch}, n={len(test_pairs)})', fontsize=13)
+fig, axes = plt.subplots(1, 3, figsize=(15, 4.5))
+fig.suptitle('Sentence-Level Score Distributions', fontsize=15, fontweight='bold', y=1.02)
+fig.text(0.5, 0.965, SUBTITLE, ha='center', fontsize=10, color='#555555')
 
-for ax, scores, label, color in zip(
+for ax, scores, label, color, better in zip(
     axes,
     [bleu_scores, chrf_scores, ter_scores],
     ['BLEU', 'ChrF', 'TER'],
-    ['steelblue', 'darkorange', 'seagreen']
+    [C_BLEU, C_CHRF, C_TER],
+    ['↑ higher is better', '↑ higher is better', '↓ lower is better'],
 ):
-    ax.hist(scores, bins=30, color=color, edgecolor='white', alpha=0.85)
-    ax.axvline(np.mean(scores), color='red', linestyle='--', linewidth=1.5, label=f'mean={np.mean(scores):.2f}')
-    ax.set_title(label)
-    ax.set_xlabel('Score')
+    ax.hist(scores, bins=30, color=color, edgecolor='white', alpha=0.9)
+    ax.axvline(scores.mean(),   color=C_ACCENT, linestyle='--', linewidth=1.6, label=f'mean = {scores.mean():.1f}')
+    ax.axvline(np.median(scores), color='#333333', linestyle=':', linewidth=1.6, label=f'median = {np.median(scores):.1f}')
+    ax.set_title(f'{label}   ({better})')
+    ax.set_xlabel('Sentence score')
     ax.set_ylabel('Count')
-    ax.legend()
+    ax.legend(loc='upper right')
 
 plt.tight_layout()
 p = os.path.join(args.out_dir, 'graph_score_distributions.png')
-plt.savefig(p, dpi=150)
+plt.savefig(p)
 plt.close()
 print(f"Saved → {p}")
 
-# ── Graph 2: Source length vs BLEU ────────────────────────────────────────────
-fig, ax = plt.subplots(figsize=(8, 5))
-sc = ax.scatter(src_lens, bleu_scores, alpha=0.4, c=chrf_scores, cmap='plasma', s=18)
-plt.colorbar(sc, ax=ax, label='ChrF Score')
-ax.set_xlabel('Source (Sanskrit) Length (chars)')
+# ── Graph 2: Source length vs BLEU (scatter + binned trend) ───────────────────
+fig, ax = plt.subplots(figsize=(8.5, 5.5))
+sc = ax.scatter(src_lens, bleu_scores, alpha=0.45, c=chrf_scores, cmap='viridis',
+                s=22, edgecolor='none')
+cbar = plt.colorbar(sc, ax=ax)
+cbar.set_label('Sentence ChrF', rotation=270, labelpad=15)
+tx, ty = _binned_trend(src_lens, bleu_scores)
+ax.plot(tx, ty, color=C_ACCENT, linewidth=2.5, marker='o', markersize=5,
+        label='binned mean BLEU')
+ax.set_xlabel('Source (English) length [characters]')
 ax.set_ylabel('Sentence BLEU')
-ax.set_title('Source Length vs BLEU')
+ax.set_title('Does translation quality degrade with sentence length?')
+ax.text(0.5, 1.015, SUBTITLE, transform=ax.transAxes, ha='center',
+        fontsize=9.5, color='#555555')
+ax.legend(loc='upper right')
 plt.tight_layout()
 p = os.path.join(args.out_dir, 'graph_srclen_vs_bleu.png')
-plt.savefig(p, dpi=150)
+plt.savefig(p)
 plt.close()
 print(f"Saved → {p}")
 
 # ── Graph 3: Reference vs Hypothesis length ───────────────────────────────────
-fig, ax = plt.subplots(figsize=(7, 6))
-ax.scatter(ref_lens, hyp_lens, alpha=0.35, s=15, color='steelblue')
-max_len = max(max(ref_lens), max(hyp_lens))
-ax.plot([0, max_len], [0, max_len], 'r--', linewidth=1.5, label='perfect length')
-ax.set_xlabel('Reference Length (chars)')
-ax.set_ylabel('Hypothesis Length (chars)')
-ax.set_title('Reference vs Predicted Length')
-ax.legend()
+fig, ax = plt.subplots(figsize=(7, 6.5))
+ax.scatter(ref_lens, hyp_lens, alpha=0.4, s=20, color=C_BLEU, edgecolor='none')
+lim = max(ref_lens.max(), hyp_lens.max()) * 1.02
+ax.plot([0, lim], [0, lim], '--', color='#333333', linewidth=1.5, label='ideal (equal length)')
+# fitted slope through origin — >1 means the model over-generates, <1 under-generates
+slope = float(np.dot(ref_lens, hyp_lens) / np.dot(ref_lens, ref_lens))
+ax.plot([0, lim], [0, slope * lim], color=C_ACCENT, linewidth=2,
+        label=f'fit: hyp ≈ {slope:.2f} × ref')
+ax.set_xlim(0, lim); ax.set_ylim(0, lim)
+ax.set_aspect('equal')
+ax.set_xlabel('Reference length [characters]')
+ax.set_ylabel('Hypothesis length [characters]')
+ax.set_title('Length calibration: is output too short or too long?')
+ax.legend(loc='upper left')
 plt.tight_layout()
 p = os.path.join(args.out_dir, 'graph_ref_vs_hyp_length.png')
-plt.savefig(p, dpi=150)
+plt.savefig(p)
 plt.close()
 print(f"Saved → {p}")
 
-# ── Graph 4: BLEU bucketed by source length ───────────────────────────────────
+# ── Graph 4: BLEU by source-length bucket (mean ± standard error) ──────────────
 buckets     = defaultdict(list)
 bucket_size = 20
 for slen, bscore in zip(src_lens, bleu_scores):
-    bucket = (slen // bucket_size) * bucket_size
-    buckets[bucket].append(bscore)
+    buckets[(slen // bucket_size) * bucket_size].append(bscore)
 
 bucket_keys  = sorted(buckets.keys())
 bucket_means = [np.mean(buckets[k]) for k in bucket_keys]
-bucket_stds  = [np.std(buckets[k])  for k in bucket_keys]
+# standard error of the mean (std/sqrt(n)) — honest uncertainty, not raw spread
+bucket_sems  = [np.std(buckets[k]) / max(np.sqrt(len(buckets[k])), 1) for k in bucket_keys]
+bucket_n     = [len(buckets[k]) for k in bucket_keys]
+labels       = [f'{k}–{k+bucket_size}' for k in bucket_keys]
 
-fig, ax = plt.subplots(figsize=(10, 5))
-ax.bar(
-    [str(k) for k in bucket_keys], bucket_means,
-    yerr=bucket_stds, color='steelblue', edgecolor='white',
-    capsize=4, alpha=0.85
-)
-ax.set_xlabel('Source Length Bucket (chars)')
-ax.set_ylabel('Mean BLEU')
-ax.set_title('BLEU by Source Length Bucket')
-plt.xticks(rotation=45)
+fig, ax = plt.subplots(figsize=(10, 5.5))
+bars = ax.bar(labels, bucket_means, yerr=bucket_sems, color=C_BLEU,
+              edgecolor='white', capsize=4, alpha=0.9, error_kw={'ecolor': '#555555'})
+for bar, n in zip(bars, bucket_n):
+    ax.text(bar.get_x() + bar.get_width() / 2, 0.5, f'n={n}',
+            ha='center', va='bottom', fontsize=8, color='white', rotation=90)
+ax.axhline(corpus_bleu, color=C_ACCENT, linestyle='--', linewidth=1.6,
+           label=f'corpus BLEU = {corpus_bleu:.1f}')
+ax.set_xlabel('Source length bucket [characters]')
+ax.set_ylabel('Mean sentence BLEU  (± SEM)')
+ax.set_title('BLEU by source-length bucket')
+ax.text(0.5, 1.015, SUBTITLE, transform=ax.transAxes, ha='center',
+        fontsize=9.5, color='#555555')
+ax.legend(loc='upper right')
+plt.xticks(rotation=45, ha='right')
 plt.tight_layout()
 p = os.path.join(args.out_dir, 'graph_bleu_by_srclen_bucket.png')
-plt.savefig(p, dpi=150)
+plt.savefig(p)
 plt.close()
 print(f"Saved → {p}")
 
 # ── Graph 5: BLEU vs ChrF correlation ─────────────────────────────────────────
-fig, ax = plt.subplots(figsize=(7, 6))
-ax.scatter(bleu_scores, chrf_scores, alpha=0.35, s=15, color='darkorange')
+fig, ax = plt.subplots(figsize=(7, 6.5))
+ax.scatter(bleu_scores, chrf_scores, alpha=0.4, s=20, color=C_CHRF, edgecolor='none')
+corr = np.corrcoef(bleu_scores, chrf_scores)[0, 1]
+m, b = np.polyfit(bleu_scores, chrf_scores, 1)
+xs = np.array([bleu_scores.min(), bleu_scores.max()])
+ax.plot(xs, m * xs + b, color=C_ACCENT, linewidth=2, label=f'linear fit (r = {corr:.3f})')
 ax.set_xlabel('Sentence BLEU')
 ax.set_ylabel('Sentence ChrF')
-ax.set_title('BLEU vs ChrF Correlation')
-corr = np.corrcoef(bleu_scores, chrf_scores)[0, 1]
-ax.text(0.05, 0.92, f'r = {corr:.3f}', transform=ax.transAxes, fontsize=11)
+ax.set_title('Agreement between BLEU and ChrF')
+ax.legend(loc='lower right')
 plt.tight_layout()
 p = os.path.join(args.out_dir, 'graph_bleu_vs_chrf.png')
-plt.savefig(p, dpi=150)
+plt.savefig(p)
 plt.close()
 print(f"Saved → {p}")
 
-# ── Graph 6: Summary bar chart ────────────────────────────────────────────────
-fig, ax = plt.subplots(figsize=(6, 4))
-metrics = ['BLEU', 'ChrF', 'TER']
-values  = [corpus_bleu, corpus_chrf, corpus_ter]
-colors  = ['steelblue', 'darkorange', 'seagreen']
-bars = ax.bar(metrics, values, color=colors, edgecolor='white', width=0.5)
-for bar, val in zip(bars, values):
-    ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.5,
-            f'{val:.2f}', ha='center', va='bottom', fontsize=11, fontweight='bold')
-ax.set_ylim(0, max(values) * 1.2)
-ax.set_ylabel('Score')
-ax.set_title(f'Corpus-Level Metrics  (epoch {trained_epoch})')
+# ── Graph 6: Corpus-level summary ─────────────────────────────────────────────
+# BLEU/ChrF (higher=better) and TER (lower=better) live on different scales and
+# directions, so they get separate panels rather than one misleading axis.
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4.8),
+                               gridspec_kw={'width_ratios': [2, 1]})
+fig.suptitle('Corpus-Level Metrics', fontsize=15, fontweight='bold', y=1.02)
+fig.text(0.5, 0.95, SUBTITLE, ha='center', fontsize=10, color='#555555')
+
+bars1 = ax1.bar(['BLEU', 'ChrF'], [corpus_bleu, corpus_chrf],
+                color=[C_BLEU, C_CHRF], edgecolor='white', width=0.55)
+for bar, val in zip(bars1, [corpus_bleu, corpus_chrf]):
+    ax1.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.5,
+             f'{val:.2f}', ha='center', va='bottom', fontsize=12, fontweight='bold')
+ax1.set_ylim(0, max(corpus_bleu, corpus_chrf) * 1.25)
+ax1.set_ylabel('Score')
+ax1.set_title('Quality  (↑ higher is better)', fontsize=12)
+
+bar2 = ax2.bar(['TER'], [corpus_ter], color=C_TER, edgecolor='white', width=0.45)
+ax2.text(bar2[0].get_x() + bar2[0].get_width() / 2, corpus_ter + 0.5,
+         f'{corpus_ter:.2f}', ha='center', va='bottom', fontsize=12, fontweight='bold')
+ax2.set_ylim(0, corpus_ter * 1.25)
+ax2.set_ylabel('Error rate')
+ax2.set_title('Error  (↓ lower is better)', fontsize=12)
+
 plt.tight_layout()
 p = os.path.join(args.out_dir, 'graph_corpus_summary.png')
-plt.savefig(p, dpi=150)
+plt.savefig(p)
 plt.close()
 print(f"Saved → {p}")
 
 # ─────────────────────────────────────────────
-# 11. SAMPLE TRANSLATIONS (printed + saved)
+# 7. SAMPLE TRANSLATIONS (printed + saved)
 # ─────────────────────────────────────────────
 
 sample_path = os.path.join(args.out_dir, 'sample_translations.txt')
 with open(sample_path, 'w', encoding='utf-8') as f:
-    f.write(f"Epoch {trained_epoch}  |  Loss {trained_loss:.4f}  |  "
+    f.write(f"Epoch {trained_epoch}  |  Dev loss {trained_loss:.4f}  |  "
             f"BLEU {corpus_bleu:.2f}  ChrF {corpus_chrf:.2f}  TER {corpus_ter:.2f}\n")
     f.write("="*70 + "\n\n")
-    # top 10 by BLEU, bottom 10 by BLEU, 10 random
     sorted_rows = sorted(rows, key=lambda r: r['bleu'], reverse=True)
     for section, sample in [("TOP 10 (highest BLEU)", sorted_rows[:10]),
                               ("BOTTOM 10 (lowest BLEU)", sorted_rows[-10:]),
                               ("RANDOM 10", [rows[i] for i in np.random.choice(len(rows), 10, replace=False)])]:
         f.write(f"\n{'─'*70}\n{section}\n{'─'*70}\n")
         for r in sample:
-            f.write(f"SKT : {r['sanskrit']}\n")
+            f.write(f"EN  : {r['source']}\n")
             f.write(f"REF : {r['reference']}\n")
             f.write(f"HYP : {r['hypothesis']}\n")
             f.write(f"     BLEU={r['bleu']:.2f}  ChrF={r['chrf']:.2f}  TER={r['ter']:.2f}\n\n")

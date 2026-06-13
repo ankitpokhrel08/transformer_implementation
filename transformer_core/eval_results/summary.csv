@@ -1,0 +1,7 @@
+metric,value
+corpus_bleu,13.7788
+corpus_chrf,41.2154
+corpus_ter,82.4608
+trained_epoch,5
+dev_loss,4.5089
+n_samples,1012

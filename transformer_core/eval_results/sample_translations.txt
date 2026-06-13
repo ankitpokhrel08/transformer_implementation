@@ -1,0 +1,165 @@
+Epoch 5  |  Dev loss 4.5089  |  BLEU 13.78  ChrF 41.22  TER 82.46
+======================================================================
+
+
+──────────────────────────────────────────────────────────────────────
+TOP 10 (highest BLEU)
+──────────────────────────────────────────────────────────────────────
+EN  : Still, take advice from authorities, obey all signs, and pay close attention to safety warnings.
+REF : अझै, अधिकारीहरूबाट सल्लाह लिनुहोस्, सबै सङ्केतहरूको पालना गर्नुहोस् र सुरक्षा चेतावनीमा ध्यान दिनुहोस्।
+HYP : तर, अधिकारीहरूबाट सल्लाह लिनुहोस्, सबै संकेतहरू पालना गर्नुहोस् र सुरक्षा चेतावनीको नजिक ध्यान दिनुहोस्।
+     BLEU=64.44  ChrF=81.79  TER=30.77
+
+EN  : You can see the pyramids in the dark and you can see them in silence before the show begins.
+REF : तपाईं अन्धकारमा पिरामिडहरू देख्न सक्नुहुन्छ र शो सुरु हुनुभन्दा पहिले तपाईं तिनीहरूलाई मौन देख्न सक्नुहुन्छ।
+HYP : तपाईं अँध्यारोमा पिरामिडहरू देख्न सक्नुहुन्छ र तपाईं शो सुरु गर्नु अघि तिनीहरूलाई मौन देख्न सक्नुहुन्छ।
+     BLEU=56.01  ChrF=69.60  TER=26.67
+
+EN  : In remote locations, without cell phone coverage, a satellite phone may be your only option.
+REF : दुर्गम स्थानहरूमा, सेल फोनको कभरेज बिना, उपग्रह फोन तपाईंको एक मात्र विकल्प हुन सक्छ।
+HYP : रिमोट स्थानहरूमा, सेल फोन कभरेज बिना, एक उपग्रह फोन तपाईंको मात्र विकल्प हुन सक्छ।
+     BLEU=55.65  ChrF=77.89  TER=21.43
+
+EN  : The rise of new technologies allows us to see and investigate brain structures and processes never seen before.
+REF : नयाँ प्रविधिहरूको उदयले हामीलाई पहिले कहिल्यै नदेखिएका मस्तिष्क संरचना र प्रक्रियाहरू हेर्न र अनुसन्धान गर्न अनुमति दिन्छ।
+HYP : नयाँ प्रविधिहरूको उदयले हामीलाई पहिले कहिल्यै देखेको छैन र अनुसन्धान गर्ने प्रक्रियाहरूको अनुसन्धान गर्न अनुमति दिन्छ।
+     BLEU=52.90  ChrF=72.60  TER=35.29
+
+EN  : Yet, Spanish is also widely used in public transport and other facilities.
+REF : यद्यपि, स्पेनी भाषा सार्वजनिक यातायात र अन्य भवनहरूमा पनि व्यापक रूपमा प्रयोग गरिन्छ।
+HYP : यद्यपि, स्पेनिश पनि सार्वजनिक यातायात र अन्य सुविधाहरूमा व्यापक रूपमा प्रयोग गरिन्छ।
+     BLEU=52.64  ChrF=75.41  TER=30.77
+
+EN  : The patient had been to Nigeria, where some cases of the Ebola virus have occurred.
+REF : बिरामी नाइजेरिया गएको थियो, जहाँ इबोला भाइरसका केही मामिलाहरू देखिएका थिए।
+HYP : धैर्यले नाइजेरियामा थियो, जहाँ इबोला भाइरसका केही केसहरू देखा पर्यो।
+     BLEU=51.91  ChrF=56.72  TER=54.55
+
+EN  : The main Amazon River is 6,387 km (3,980 miles). It collects water from thousands of smaller rivers.
+REF : मुख्य अमेजन नदी 6,387 किलोमिटर (3,980 माइल) छ। यसले हजारौं साना नदीहरूबाट पानी सङ्कलन गर्दछ।
+HYP : मुख्य अमेजन नदी 6.387 किलोमिटर छ (3980 किलोमिटर) यसले हजारौं साना नदीहरूबाट पानी स collect्कलन गर्दछ।
+     BLEU=51.60  ChrF=71.31  TER=40.00
+
+EN  : They are still trying to determine just how large the crash was and how the Earth will be affected.
+REF : तिनीहरू दुर्घटना कति ठूलो थियो र पृथ्वी कसरी प्रभावित हुनेछ भन्ने निर्धारण गर्न अझै पनि कोसिस गर्दैछन्।
+HYP : तिनीहरू अझै पनि निर्धारण गर्न कोशिस गरिरहेका छन् कि दुर्घटना कति ठूलो थियो र पृथ्वी कसरी प्रभावित हुनेछ।
+     BLEU=48.25  ChrF=72.56  TER=58.82
+
+EN  : Willingness of foreign governments to honour these documents is just as widely variable.
+REF : यी कागजातहरूलाई सम्मान गर्न विदेशी सरकारहरूको तत्परता फरक फरक छ।
+HYP : यी कागजातहरूलाई सम्मान गर्न विदेशी सरकारको इच्छाहरू व्यापक रूपमा फरक हुन्छ।
+     BLEU=46.83  ChrF=67.58  TER=50.00
+
+EN  : However, that is not true. Although there is something written on the back of the document, it is not a treasure map.
+REF : यद्यपि, त्यो सत्य होइन। कागजातको पछाडि केही लेखिएको भए तापनि, त्यो खजानाको नक्सा होइन।
+HYP : यद्यपि, त्यो सत्य होइन, यद्यपि कागजको पछाडि केही लेखिएको छ, यो सम्पत्ति नक्सा होइन।
+     BLEU=46.31  ChrF=61.24  TER=50.00
+
+
+──────────────────────────────────────────────────────────────────────
+BOTTOM 10 (lowest BLEU)
+──────────────────────────────────────────────────────────────────────
+EN  : Edgar Veguilla received arm and jaw wounds while Kristoffer Schneider was left requiring reconstructive surgery for his face.
+REF : एड्गर भेगिल्लालाई पाखुरा र बङ्गारामा घाउ भएको थियो जबकि क्रिस्टोफर स्नाइडर उनको अनुहार फेरि बनाउने सर्जरी आवश्यक भएकाले छोडिएका थिए।
+HYP : एडगर विगलाले हात र जव हलियर स्टॉचरको अनुभव गरे जबकि Krisere Sechner Sechnerererer आफ्नो मुखको लागि पुनःनिर्माण गतिविधि आवश्यक थियो।
+     BLEU=1.46  ChrF=18.01  TER=95.00
+
+EN  : The accused are named as Baba Kanjar, Bhutha Kanjar, Rampro Kanjar, Gaza Kanjar and Vishnu Kanjar.
+REF : पक्राउ पर्नेमा Baba Kanjar, Bhutha Kanjar, Rampro Kanjar, Gaza Kanjar र Vishnu Kanjar रहेका छन्।
+HYP : आरोपहरू बाबेल क्राइसा क्राइज, भेरू, रोम क्राइस क्राइभ, गाजा क्राइभ र विनिश क्राइभरको नामको नाम हो।
+     BLEU=1.45  ChrF=5.91  TER=100.00
+
+EN  : However, the percentage of XDR-TB in the entire group of people with tuberculosis still seems to be low; 6,000 of the total 330,000 people infected at any particular moment in South Africa.
+REF : एक वर्षमा संक्रमित व्यक्तिले 10 देखि 15 नजिकका सम्पर्कित व्यक्तिहरूलाई संक्रमित गर्न सक्छ।
+HYP : यद्यपि, Targis संग मान्छे को सम्पूर्ण समूहमा को प्रतिशत अझै पनि कम देखिन्छ; दक्षिण अफ्रीका मा कुनै पनि विशेष समयमा संक्रमित कुल 330,000 मान्छे को एक विशेष क्षण को एक विशेष समयमा।
+     BLEU=1.28  ChrF=23.69  TER=238.46
+
+EN  : Mutations can have a variety of different effects depending on the type of mutation, the significance of the piece of genetic material affected and whether the cells affected are germ-line cells.
+REF : उत्परिवर्तनका विभिन्न प्रकारका प्रभावहरू उत्परिवर्तनका प्रकार, प्रभावित आनुवंशिक सामग्रीको टुक्राको महत्त्व र यदि प्रभावित कोषहरू कीटाणु(रेखा कोषहरू हुनुमा भर पर्दछन्।
+HYP : Mutation को प्रकार मा निर्भर विभिन्न प्रभावहरु को एक विविधता हुन सक्छ, प्रभाव को एक को रूप मा र सेलहरु प्रभावित छन् glllllllline सेलहरु छन् कि छैन।
+     BLEU=1.24  ChrF=26.81  TER=120.00
+
+EN  : In an adoption, the birth parents terminate their parental rights so that another couple may parent the child.
+REF : धर्मसन्तान ग्रहण गर्दा, ग्रहण गर्ने दम्पत्ति बच्चाको आमाबुबा बन्न सकून् भन्नाका खातिर जन्म दिने आमाबुवाले आमाबुबाका रूपमा आफ्ना अधिकार परित्याग गर्छन्।
+HYP : एक पहिचान मा, जन्म आमा बुबा आफ्नो आमा-आमा अधिकार समाप्त गर्नुहुन्छ ताकि अर्को जोडी बच्चा आमा बन्न सक्छ।
+     BLEU=1.23  ChrF=25.96  TER=100.00
+
+EN  : The forests aren't just mangrove swamps though — they include some of the last remaining stands of the mighty jungles which once covered the Gangetic plain.
+REF : जङ्गलहरू सदाबहार दलदलहरू मात्र नभए पनि — यिनीहरूमा कुनै समयमा गंगाको मैदान समेट्ने अति ठूलो जङ्गलको केही अन्तिम बाँकी स्थानहरू समावेश छन्।
+HYP : जंगल केवल पुरुषgroscs हुन् यद्यपि तिनीहरू केहि बाँकी शक्ति बंगल्स को अन्तिम खडा समावेश गर्छन् जो एक पटक Gangiic सापेक्ष कभर।
+     BLEU=1.20  ChrF=20.87  TER=100.00
+
+EN  : According to the lawsuit, waste from the UN camp was not properly sanitized, causing bacteria to enter the tributary of the Artibonite River, one of Haiti's largest.
+REF : सन् 2009 मा उनलाई वर्षको राष्ट्रिय सुपरिटेन्डेन्टको पदकबाट सम्मानित गरिएको थियो।
+HYP : मुद्दा अनुसार, संयुक्त राष्ट्र शिविरमाबाट बर्बाद ठीक रूपमा ठीक रूपमा थिएन, कलाबिट नदीको प्रान्तीय नदीको प्रान्तीय प्रवेश गर्न ब्याक्टेरियालेसको सबैभन्दा ठूलो हो।
+     BLEU=1.18  ChrF=21.62  TER=200.00
+
+EN  : Dustin "Goldust" Runnels commented that "Luna was as freaky as me...maybe even more...love her and will miss her...hopefully she's in a better place."
+REF : डस्टिन “गोल्डस्ट” रनल्सले टिप्पणी गरे कि “लुना मजत्तिकै विचित्र थिइन्...हुनसक्छ त्यसभन्दा पनि बढी...उनलाई माया गर्छु र उनलाई याद गर्नेछु...आशा छ कि उनी अझ राम्रो ठाउँमा छिन्।”
+HYP : Drestin "Lara मलाई रूपमा faky थियो भनेर टिप्पणी ... शायद उनको प्रेम र उनी एक राम्रो ठाउँमा छ।
+     BLEU=1.12  ChrF=18.45  TER=84.62
+
+EN  : The satellites, both of which weighed in excess of 1,000 pounds, and traveling at approximately 17,500 miles per hour, collided 491 miles above the Earth.
+REF : यद्यपि, क्षयरोग भएका मानिसहरूको सम्पूर्ण समूहमा XDR-TB को प्रतिशत अझै कम देखिन्छ; दक्षिण अफ्रिकामा कुनै विशेष समयमा संक्रमित कुल 330,000मध्ये 6,000 रहेको छ।
+HYP : उपग्रहहरू, जुन हामी दुईले १,०० पाउन्ड भन्दा बढी कमाएको थियो, र प्रति घण्टा १७०० किलोमिटर टाढा यात्रा गरे, पृथ्वीको माथि 491 किलोमिटर टाढा।
+     BLEU=1.01  ChrF=12.43  TER=100.00
+
+EN  : Muhammad was deeply interested in matters beyond this mundane life. He used to frequent a cave that became known as “Hira‘” on the Mountain of “Noor” (light) for contemplation.
+REF : मोहम्मदमा यस सांसारिक जीवन भन्दा परको बारेमा गहिरो चासो थियो। उनले बारम्बार गुफाको प्रयोग गर्दथे जुन चिन्तनका लागि “नूर” (प्रकाश) को पहाडमा “हिरा” “भनेर चिनिन्थ्यो।
+HYP : मुसा यस मिन्डेन जीवन भन्दा बाहिर धेरै रुचि राख्थ्यो।
+     BLEU=0.35  ChrF=14.23  TER=88.00
+
+
+──────────────────────────────────────────────────────────────────────
+RANDOM 10
+──────────────────────────────────────────────────────────────────────
+EN  : The pyramid sound and light show is one of the most interesting things in the area for kids.
+REF : पिरामिड ध्वनि र लाइट शो क्षेत्रमा बच्चाहरूका लागि सबैभन्दा चाखलाग्दा चीजहरूमध्ये एक हो।
+HYP : पिम्रम ध्वनि र प्रकाश शो बच्चाहरूको लागि क्षेत्रमा सबैभन्दा रोचक चीजहरू मध्ये एक हो।
+     BLEU=9.52  ChrF=54.24  TER=53.85
+
+EN  : In many cases, enrolling on a gap-year course abroad can actually improve your chances of moving into higher education back in your home country.
+REF : धेरै अवस्थाहरूमा, विदेशमा एक अन्तराल-वर्षको पाठ्यक्रममा भर्ना हुनाले तपाईंलाई आफ्नो गृह राष्ट्रमा फेरि उच्च शिक्षामा फर्कने तपाईंको सम्भावनालाई वास्तविक रूपमा सुधार गर्न सक्छ।
+HYP : धेरै केसहरूमा, एक अन्तर-वर्षको कोर्स मा संलग्न, वास्तवमा तपाईंको घर देशमा उच्च शिक्षाको लागि तपाईंको अवसर सुधार गर्न सक्दछ।
+     BLEU=5.87  ChrF=35.87  TER=73.91
+
+EN  : If you visit the Arctic or Antarctic areas in the winter you will experience the polar night, which means that the sun doesn't rise above the horizon.
+REF : तपाईं जाडोमा आर्कटिक वा अन्टार्कटिक क्षेत्रहरू भ्रमण गर्नु हुन्छ भने तपाईंले ध्रुवीय रातको अनुभव गर्नु हुनेछ जसको मतलब सूर्य क्षितिज भन्दा माथि उदाउँदैन।
+HYP : यदि तपाईं जाडोमा अर्टार्क वा अन्टार्कटिक क्षेत्रहरूमा भ्रमण गर्नुहुन्छ भने, यसको मतलब सूर्य माथि माथि वृद्धि हुँदैन।
+     BLEU=20.85  ChrF=51.75  TER=73.91
+
+EN  : At the beginning dress was heavily influenced by the Byzantine culture in the east.
+REF : पूर्वमा बाइजान्टिन संस्कृतिबाट पोशाक धेरै प्रभावित थियो।
+HYP : सुरुमा कपडा पूर्वी भाषामा भारी प्रभाव पर्यो।
+     BLEU=3.14  ChrF=19.73  TER=100.00
+
+EN  : Cherry blossom viewing, known as hanami, has been a part of Japanese culture since the 8th century.
+REF : हानामी भनेर चिनिने, चेरी फुलिरहेको हेर्ने 8 औँ शताब्दीदेखि जापानी संस्कृतिको एउटा भाग रहँदै आएको छ।
+HYP : चेरी फूलहरू हेर्दै, नान्नीमी भनेर चिनिन्छन्, आठ औं शताब्दीदेखि जापानी संस्कृतिको हिस्सा भएको छ।
+     BLEU=23.97  ChrF=53.12  TER=75.00
+
+EN  : This seems sensible, because the Earth doesn't feel as if it's moving, does it?
+REF : यो समझदार देखिन्छ, किनभने पृथ्वीले यो चलिरहेको जस्तो महसुस गर्दैन, गर्छ त?
+HYP : यो संवेदनशील देखिन्छ, किनकि पृथ्वीले यो महसुस गर्दैन, यो के हो?
+     BLEU=16.18  ChrF=49.47  TER=58.33
+
+EN  : If visiting a formally arranged garden, collecting "specimens" is also going to get you ejected, without discussion.
+REF : तपाईं औपचारिक रूपमा व्यवस्थित बगैंचा भ्रमण गर्नुहुँदैछ भने, “नमुनाहरू” सङ्कलन गर्नाले पनि तपाईंलाई कुनै छलफलबिनाबाहिर निकालिनेछ।
+HYP : यदि एक औपचारिक रूपमा व्यवस्था गरिएको बगैंचा भ्रमण गर्दा, "विदेशी" पनि तपाईंलाई इनोभेड प्राप्त गर्न जाँदैछौं, बहस बिना।
+     BLEU=8.85  ChrF=41.88  TER=81.25
+
+EN  : In 1683, Qing dynasty (1644-1912) forces take control of Taiwan’s western and northern coastal areas and declared Taiwan as a province of the Qing Empire in 1885.
+REF : सन् 1683 मा, किङ वंश (1644-1912) बलले ताइवानको पश्चिमी र उत्तरी तटीय क्षेत्रको नियन्त्रण लिए र ताइवानलाई सन् 1885 मा किङ साम्राज्यको प्रान्तको रूपमा घोषणा गरे।
+HYP : 1683 मा, क्राइभिंग ग्युर (164-191 सेनाहरू ताइवानको पश्चिमी र उत्तरी तटस्थ क्षेत्र र ताइवानको नियन्त्रणलाई 1885 मा साम्राज्यको प्रान्तको रूपमा घोषणा गर्छन्।
+     BLEU=38.03  ChrF=64.72  TER=50.00
+
+EN  : The wheel has changed the world in incredible ways. The biggest thing that the wheel has done for us is given us much easier and faster transportation.
+REF : पाङ्ग्राले विश्वलाई अविश्वसनीय मार्गहरूमा परिवर्तन गरेको छ। पाङ्ग्राले हाम्रोलागि गरेको सबैभन्दा ठूलो कुरा भनेको हाम्रो धेरै सजिलो र छिटो यातायात हो।
+HYP : पास्टरले विश्वको अविश्वसनीय तरिकामा परिवर्तन गरेको छ, जुन हाम्रो लागि गरिएको सबैभन्दा सजिलो र छिटो यातायात हो।
+     BLEU=28.77  ChrF=52.01  TER=61.90
+
+EN  : Officials for the city of Amsterdam and the Anne Frank Museum state that the tree is infected with a fungus and poses a public health hazard as they argue that it was in imminent danger of falling over.
+REF : एम्स्टर्डाम सहर र एनी फ्र्याङ्क सङ्ग्रहालयका अधिकारीहरूले बताउँछन् कि ढुसीले रूख सङ्क्रमित भएको छ र जनस्वास्थ्यमा यति खतरा गराउँछ कि तिनीहरूले तर्क गरेअनुसार यो ढल्ने खतरा हुन लागेको थियो।
+HYP : विश्वविद्यालयका लागि अधिकारी र आडम्बू संग्रहालयका लागि यो रूख एक रमाइलो र सार्वजनिक स्वास्थ्य जोखिम संग संक्रमित छ भनेर छ कि को लागि अधिकारीहरूले तर्क गरे कि यो माथि घट्दछ।
+     BLEU=3.16  ChrF=32.57  TER=96.55
+
