@@ -1,101 +1,37 @@
-# English-to-Nepali Neural Machine Translation
+# English → Nepali Neural Machine Translation
 
-A from-scratch Transformer (Vaswani et al. 2017) in PyTorch, being trained on the
-NLLB English-Nepali mined corpus (~19.6M raw pairs) and evaluated on the standard
-FLORES-200 benchmark.
+A from-scratch Transformer (Vaswani et al. 2017) in PyTorch, trained on the NLLB
+English–Nepali mined corpus and evaluated on the standard FLORES-200 benchmark. A
+35M-parameter model trained on a laptop (Apple M2 Air) that produces fluent,
+source-conditioned Nepali on everyday prose.
 
-> **Status**: active project. Started as Sanskrit→English (see *Chapter 1* below for
-> that work and the verdict that motivated the pivot), now English→Nepali: a 35M-param
-> transformer trained from scratch on 1M NLLB pairs and evaluated on FLORES-200.
+> Curious how the project got here (it began as Sanskrit→English)? The full history,
+> the pivot, and the lessons are in **[learning.md](learning.md)**.
 
-## Why the pivot? — Project history
+![Architecture](assets/architecture.png)
 
-This repo started as Sanskrit→English translation and went through three phases.
-Each one taught something concrete; the readme keeps the full story because the
-journey *is* the project.
+## Results
 
-### Chapter 1 — Sanskrit→English, and the verdict
+Final corpus scores on **FLORES-200 devtest** (1,012 unseen sentences, greedy decoding,
+best-dev checkpoint at epoch 5). BLEU uses the `flores200` (Devanagari-aware) tokenizer.
 
-**v1 (character-level)**: a faithful paper implementation that tokenized at the
-character level and padded every sequence to 200 positions. Ten epochs took ~18
-hours on an Apple M2 Air and produced phonetic mush ("The sordhipful asni samself
-wonsimed tir hoat"). Post-mortem: ~80% of attention compute was spent on padding
-tokens, and character-level models must learn to *spell* 50,000 unique English
-words before they can translate.
+| Metric      | Score      |
+| ----------- | ---------- |
+| Corpus BLEU | **13.78**  |
+| Corpus ChrF | **41.22**  |
+| Corpus TER  | **82.46**  |
 
-**v2 (BPE + bucketed batching)**: same architecture, rebuilt data pipeline —
-SentencePiece BPE (8k vocab/side), batches bucketed by length and padded only to
-the batch max, paper LR schedule, dev-set early stopping. Result: **12× faster
-epochs** (~7 min), 2.6× more usable data (73,227 pairs), and fluent
-source-conditioned English after ~80 minutes of training:
-
-```
-SKT : तस्य तद् वचनं श्रुत्वा रामस्य मुनिपुङ्गवः। आख्यातुं तत्समारेभे विशालायाः पुरातनम्॥
-REF : Hearing those words of Rāma, that foremost of ascetics began to relate the history of Viśālā...
-HYP : Hearing those words of the ascetic, the king of the celestials, viz., Rama, became highly pleased.
-```
-
-Held-out test scores (500 unseen sentences, greedy decoding, best-dev checkpoint):
-**BLEU 2.08 · ChrF 21.44 · TER 106.50**.
-
-**The verdict**: the architecture and pipeline were correct — the *dataset* had no
-headroom. The Itihāsa corpus is epic verse (Rāmāyaṇa/Mahābhārata ślokas) paired
-with free, literary Victorian-style translations: no word alignment to latch onto,
-75k pairs total, and published from-scratch baselines on it also score single-digit
-BLEU. In low-resource MT, **data is the model**. A from-scratch transformer on 73k
-pairs of poetry cannot produce a resume-worthy translator no matter how clean the
-code is — so the engineering moved to a language pair with 20× the data and a
-standard benchmark: English→Nepali (NLLB mined corpus, ~1.6M quality-filtered
-pairs, FLORES-200 evaluation).
-
-### Chapter 2 — English→Nepali (current)
-
-- **Data**: [NLLB](https://opus.nlpl.eu/legacy/NLLB.php) mined English-Nepali bitext
-  (~19.6M raw pairs). Cleaned by script check, length ratio, and dedupe, then the
-  **top 1,000,000 pairs by LASER mining score** are kept (`data_nepali/prepare_data.py`).
-  Evaluated on [FLORES-200](https://github.com/facebookresearch/flores) — dev (997)
-  for validation, devtest (1,012) for the final number. A standard, citable benchmark.
-- **Pipeline**: same as v2 — SentencePiece BPE (16k vocab/side), length-bucketed
-  batching, warmup + inverse-sqrt LR, label smoothing 0.1, best-dev checkpointing.
-- **Training**: 6 epochs on an Apple M2 Air (MPS), ~2 hours/epoch. Dev loss fell
-  monotonically 9.69 → ~4.55 with no overfitting.
-
-See `EVALUATION_GUIDE.txt` for a plain-English explanation of every metric and graph.
-
-## Architecture
-
-- **Type**: Encoder-Decoder Transformer (Vaswani et al. 2017), implemented from scratch
-- **Size**: d_model 384, FFN hidden 1536, 8 heads, 4 encoder + 4 decoder layers
-  (**35.0M parameters**)
-- **Tokenization**: SentencePiece BPE, 16,000 pieces per language, byte fallback (no UNK)
-- **Sequence length**: BPE pairs capped at 96 tokens (positional capacity 128);
-  median sentence is ~28 tokens
-- **Components**: multi-head self/cross attention, sinusoidal positional encodings,
-  layer norm, position-wise FFN — see `transformer_core/transformer.py` and the
-  step-by-step notebooks in `transformer_core/components/`
-- **Training**: Adam (betas 0.9/0.98), 4000-step warmup + inverse-sqrt decay,
-  label smoothing 0.1, gradient clipping (max-norm 1.0), Xavier init, batch size 64
-- **Hardware**: Apple Silicon (MPS), CUDA, or CPU — auto-detected
-
-## Results (English→Nepali)
-
-Final corpus scores on FLORES-200 devtest (1,012 unseen sentences, greedy decoding,
-best-dev checkpoint at epoch 5/step 92k). BLEU uses the `flores200` (Devanagari-aware)
-tokenizer.
-
-| Metric      | English→Nepali | Sanskrit→English (Ch. 1) |
-| ----------- | -------------- | ------------------------ |
-| Corpus BLEU | **13.78**      | 2.08                     |
-| Corpus ChrF | **41.22**      | 21.44                    |
-| Corpus TER  | **82.46**      | 106.50                   |
+![Corpus summary](assets/graph_corpus_summary.png)
 
 > For a from-scratch model on a low-resource pair, **ChrF is the fairer judge** —
-> Nepali's rich inflection makes BLEU's exact-word matching read low. See the guide.
+> Nepali's rich inflection makes BLEU's exact-word matching read low.
 
 Double-digit BLEU and 41 ChrF from a 35M-parameter model trained from scratch on a
 laptop is a solid, honest result. Large pretrained systems (NLLB, Google) score
 higher because they pretrain on billions of sentences across 200 languages — but
 this run proves the from-scratch pipeline genuinely works once the data has headroom.
+
+### Example translation
 
 The model handles everyday prose well; its best translations are near-human:
 
@@ -106,10 +42,63 @@ HYP : रिमोट स्थानहरूमा, सेल फोन कभ
       (BLEU 55.7 · ChrF 77.9)
 ```
 
-Common failure modes: dropping rare compound terms ("machine learning" → "मेशिन"),
-occasional clause repetition on long inputs, and borrowing English loanwords
-("रिमोट") where a native term exists. All expected for the data scale and greedy
-decoding; beam search and more epochs would close part of the gap.
+**Common failure modes**: dropping rare compound terms ("machine learning" → "मेशिन"),
+occasional clause repetition on long inputs, and borrowing English loanwords ("रिमोट")
+where a native term exists. All expected for the data scale and greedy decoding; beam
+search and more epochs would close part of the gap.
+
+## Statistics
+
+<table>
+  <tr>
+    <td><img src="assets/graph_score_distributions.png" alt="Score distributions"></td>
+    <td><img src="assets/graph_srclen_vs_bleu.png" alt="Source length vs BLEU"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Sentence-level BLEU / ChrF / TER distributions</sub></td>
+    <td align="center"><sub>Does quality degrade with sentence length?</sub></td>
+  </tr>
+  <tr>
+    <td><img src="assets/graph_bleu_by_srclen_bucket.png" alt="BLEU by source-length bucket"></td>
+    <td><img src="assets/graph_ref_vs_hyp_length.png" alt="Reference vs hypothesis length"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>BLEU by source-length bucket (± SEM)</sub></td>
+    <td align="center"><sub>Length calibration: output too short or too long?</sub></td>
+  </tr>
+</table>
+
+![BLEU vs ChrF](assets/graph_bleu_vs_chrf.png)
+
+All graphs are regenerated by `transformer_core/evaluation.py` into
+`transformer_core/eval_results/`.
+
+## Architecture
+
+- **Type**: Encoder–Decoder Transformer (Vaswani et al. 2017), implemented from scratch
+- **Size**: d_model 384, FFN hidden 1536, 8 heads, 4 encoder + 4 decoder layers
+  (**35.0M parameters**)
+- **Tokenization**: SentencePiece BPE, 16,000 pieces per language, byte fallback (no UNK)
+- **Sequence length**: BPE pairs capped at 96 tokens (positional capacity 128);
+  median sentence is ~28 tokens
+- **Components**: multi-head self/cross attention, sinusoidal positional encodings,
+  layer norm, position-wise FFN — see `transformer_core/transformer.py` and the
+  step-by-step notebooks in `transformer_core/components/`
+- **Training**: Adam (betas 0.9/0.98), 4000-step warmup + inverse-sqrt decay, label
+  smoothing 0.1, gradient clipping (max-norm 1.0), Xavier init, batch size 64
+- **Hardware**: Apple Silicon (MPS), CUDA, or CPU — auto-detected
+
+## Data & training
+
+- **Data**: [NLLB](https://opus.nlpl.eu/legacy/NLLB.php) mined English–Nepali bitext
+  (~19.6M raw pairs). Cleaned by script check, length ratio, and dedupe, then the
+  **top 1,000,000 pairs by LASER mining score** are kept (`data_nepali/prepare_data.py`).
+- **Benchmark**: [FLORES-200](https://github.com/facebookresearch/flores) — dev (997)
+  for validation, devtest (1,012) for the final number. A standard, citable benchmark.
+- **Pipeline**: SentencePiece BPE (16k vocab/side), length-bucketed batching, warmup +
+  inverse-sqrt LR, label smoothing 0.1, best-dev checkpointing.
+- **Training run**: 6 epochs on an Apple M2 Air (MPS), ~2 hours/epoch. Dev loss fell
+  monotonically 9.69 → ~4.55 with no overfitting.
 
 ## Quick Start
 
@@ -131,15 +120,12 @@ python3 training.py          # resumes from checkpoint automatically
 python3 evaluation.py        # BLEU/ChrF/TER + graphs on FLORES-200 devtest
 ```
 
-## Lessons learned (the short version)
+### Inference
 
-1. **Tokenization is leverage**: char → BPE cut sequence length 4×, epoch time 12×,
-   and turned gibberish into grammar.
-2. **Never pad to a global max**: bucket by length and pad per batch.
-3. **Data beats architecture**: the same pipeline that floundered on 73k poetry
-   pairs (BLEU ~2) produces fluent output on 1M everyday-prose pairs.
-4. **Always hold out a real test set** and benchmark against published numbers —
-   a metric only means something in context.
+Open **`transformer_core/inference.ipynb`** for a notebook that loads the checkpoint
+and translates English sentences interactively (select the project `venv` as the
+kernel). It reuses the same tokenizers and `greedy_translate` as evaluation, so what
+you see in the notebook matches the benchmark exactly.
 
 ## Better Approach — Fine-tuning
 
@@ -149,6 +135,5 @@ demonstrates this:
 
 **[Fine-tuning Llama-2-7b-chat-hf with QLoRA](https://github.com/ankitpokhrel08/llm-projects/tree/main/finetuning_Llama-2-7b-chat-hf)**
 
-Fine-tunes `meta-llama/Llama-2-7b-chat-hf` using QLoRA on a custom Bhagavad Gita
-dataset. Pretrained language understanding + parameter-efficient fine-tuning gives
-superior quality at a fraction of the compute.
+Pretrained language understanding + parameter-efficient fine-tuning gives superior
+quality at a fraction of the compute.
