@@ -17,7 +17,8 @@ source-conditioned Nepali on everyday prose.
 ## Results
 
 Final corpus scores on **FLORES-200 devtest** (1,012 unseen sentences, greedy decoding,
-best-dev checkpoint at epoch 5). BLEU uses the `flores200` (Devanagari-aware) tokenizer.
+best-dev checkpoint, from the final of 6 epochs). BLEU uses the `flores200`
+(Devanagari-aware) tokenizer.
 
 | Metric      | Score      |
 | ----------- | ---------- |
