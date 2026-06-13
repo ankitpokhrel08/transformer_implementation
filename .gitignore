@@ -13,3 +13,8 @@ data_nepali/train.ne
 EVALUATION_GUIDE.txt
 resume.txt
 linkedin.md
+
+# HF Space deploy artifacts — the 140MB slim checkpoint shouldn't bloat this repo
+space/*.pth
+
+

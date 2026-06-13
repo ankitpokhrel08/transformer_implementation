@@ -1,5 +1,9 @@
 # English → Nepali Neural Machine Translation
 
+[![Live Demo on Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Live%20Demo-Hugging%20Face%20Space-blue)](https://huggingface.co/spaces/ankitpokhrel/english-to-nepali)
+
+**▶️ Try it live: [huggingface.co/spaces/ankitpokhrel/english-to-nepali](https://huggingface.co/spaces/ankitpokhrel/english-to-nepali)**
+
 A from-scratch Transformer (Vaswani et al. 2017) in PyTorch, trained on the NLLB
 English–Nepali mined corpus and evaluated on the standard FLORES-200 benchmark. A
 35M-parameter model trained on a laptop (Apple M2 Air) that produces fluent,
